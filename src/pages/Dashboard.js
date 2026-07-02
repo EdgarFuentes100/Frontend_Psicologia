@@ -8,7 +8,9 @@ const Dashboard = () => {
   const [showSidebar, setShowSidebar] = useState(false);
 
   const menuItems = [
-    { path: "consultas", label: "Consultas", roles: ["medico", "Administrador"], icon: "bi-people-fill" },
+    { path: "consultas", label: "Consultas", roles: ["Doctor", "Administrador"], icon: "bi-people-fill" },
+    { path: "citas", label: "CitasView", roles: ["Doctor", "Administrador"], icon: "bi-people-fill" },
+
   ];
 
   const allowedMenu = menuItems.filter(item => item.roles.includes(user.rol));
