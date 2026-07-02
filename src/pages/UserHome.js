@@ -1,7 +1,11 @@
 import { useState } from "react";
 import { useAuthContext } from "../auth/AuthProvider";
-
+import { useArea } from "../Hooks/useArea"
+import { useDoctor } from "../Hooks/useDoctor";
+import { useServicio } from "../Hooks/useServicio";
+import { useHorario } from "../Hooks/useHorario";
 // Datos de prueba estáticos con los días y horas que trabaja cada doctor
+
 const areasData = [
     {
         id: "med-general",
@@ -9,16 +13,16 @@ const areasData = [
         icono: "bi-heart-pulse-fill",
         color: "bg-primary-subtle text-primary",
         doctores: [
-            { 
-                id: "doc-1", 
-                nombre: "Dr. Carlos Pérez", 
+            {
+                id: "doc-1",
+                nombre: "Dr. Carlos Pérez",
                 servicios: ["Consulta General", "Chequeo Ejecutivo"],
                 diasLaborales: [1, 2, 3, 4, 5], // Lunes a Viernes (JS: 1=Lun, 5=Vie)
                 horarios: ["08:00 AM", "09:00 AM", "10:00 AM", "11:00 AM", "02:00 PM", "03:00 PM"]
             },
-            { 
-                id: "doc-2", 
-                nombre: "Dra. María Gómez", 
+            {
+                id: "doc-2",
+                nombre: "Dra. María Gómez",
                 servicios: ["Consulta General", "Certificado Médico"],
                 diasLaborales: [1, 3, 5], // Lunes, Miércoles y Viernes
                 horarios: ["09:00 AM", "10:30 AM", "11:30 AM", "04:00 PM", "05:00 PM"]
@@ -31,16 +35,16 @@ const areasData = [
         icono: "bi-backpack-fill",
         color: "bg-warning-subtle text-warning",
         doctores: [
-            { 
-                id: "doc-3", 
-                nombre: "Dr. Luis Alva", 
+            {
+                id: "doc-3",
+                nombre: "Dr. Luis Alva",
                 servicios: ["Control de Crecimiento", "Vacunación Infantil"],
                 diasLaborales: [2, 4], // Martes y Jueves
                 horarios: ["08:30 AM", "10:00 AM", "11:30 AM", "03:30 PM"]
             },
-            { 
-                id: "doc-4", 
-                nombre: "Dra. Ana Martínez", 
+            {
+                id: "doc-4",
+                nombre: "Dra. Ana Martínez",
                 servicios: ["Consulta Pediátrica de Emergencia"],
                 diasLaborales: [1, 2, 3, 4, 5, 6], // Lunes a Sábado
                 horarios: ["07:00 AM", "08:00 AM", "12:00 PM", "01:00 PM"]
@@ -51,10 +55,10 @@ const areasData = [
         id: "psicologia",
         nombre: "Psicología Clínica",
         icono: "bi-brain-fill",
-        color: "bg-info-subtle text-info", 
+        color: "bg-info-subtle text-info",
         doctores: [
-            { 
-                id: "doc-5", 
+            {
+                id: "doc-5",
                 nombre: "Licda. Rivera",
                 servicios: [
                     "Evaluación psicológica integral", "Psicoterapia para niños, adolescentes y adultos",
@@ -95,6 +99,10 @@ const historialInicial = [
 
 const UserHome = () => {
     const { user, logout } = useAuthContext();
+    const { area } = useArea();
+    const { doctor, getDoctor } = useDoctor();
+    const { servicio, getServicio } = useServicio();
+    const { horario, getHorario } = useHorario();
 
     const [seccionActiva, setSeccionActiva] = useState("agendar");
     const [pasoFormulario, setPasoFormulario] = useState(1);
@@ -147,7 +155,7 @@ const UserHome = () => {
     const handleAgendar = (e) => {
         e.preventDefault();
         if (errorFecha) return;
-        
+
         const nuevaCita = {
             id: `cita-${Date.now()}`,
             area: areaObjeto?.nombre,
@@ -173,7 +181,7 @@ const UserHome = () => {
 
     return (
         <div className="min-vh-100 bg-light d-flex flex-column pb-5" style={{ userSelect: "none" }}>
-            
+
             {/* Header Premium Adaptado */}
             <nav className="navbar bg-white px-4 py-3 border-bottom sticky-top shadow-sm">
                 <div className="container-xl d-flex justify-content-between align-items-center">
@@ -186,7 +194,7 @@ const UserHome = () => {
                             <span className="fw-bold text-dark" style={{ fontSize: "16px" }}>{user?.name || "Paciente"}</span>
                         </div>
                     </div>
-                    
+
                     <div className="d-none d-md-flex gap-2 bg-light p-1 rounded-pill">
                         <button className={`btn rounded-pill px-4 py-2 small fw-bold border-0 ${seccionActiva === "agendar" ? "btn-primary shadow-sm" : "text-secondary"}`} onClick={() => setSeccionActiva("agendar")}>
                             <i className="bi bi-calendar-plus me-2"></i>Agendar
@@ -207,16 +215,16 @@ const UserHome = () => {
 
             {/* Contenido Principal */}
             <div className="container-xl flex-grow-1 p-3 p-md-4 mt-3 mb-5" style={{ maxWidth: "1000px" }}>
-                
+
                 {/* 1. SECCIÓN AGENDAR */}
                 {seccionActiva === "agendar" && (
                     <div className="card border-0 shadow-sm p-4 p-md-5 bg-white mb-4" style={{ borderRadius: "24px" }}>
-                        
+
                         {/* BOTÓN REGRESAR GLOBAL (Fijo arriba del flujo para que siempre puedan volver) */}
                         {pasoFormulario > 1 && (
-                            <button 
-                                type="button" 
-                                className="btn btn-sm btn-light text-secondary border rounded-pill px-3 py-2 mb-3 fw-semibold shadow-sm transition-all" 
+                            <button
+                                type="button"
+                                className="btn btn-sm btn-light text-secondary border rounded-pill px-3 py-2 mb-3 fw-semibold shadow-sm transition-all"
                                 onClick={() => setPasoFormulario(pasoFormulario - 1)}
                             >
                                 <i className="bi bi-arrow-left me-1"></i> Volver al paso anterior
@@ -236,7 +244,7 @@ const UserHome = () => {
                         </div>
 
                         <form onSubmit={handleAgendar}>
-                            
+
                             {/* PASO 1: ESPECIALIDADES */}
                             {pasoFormulario === 1 && (
                                 <div className="animate__animated animate__fadeIn">
@@ -244,7 +252,7 @@ const UserHome = () => {
                                     <div className="row g-3">
                                         {areasData.map(area => (
                                             <div className="col-12 col-sm-6 col-md-4" key={area.id}>
-                                                <div 
+                                                <div
                                                     className={`card h-100 p-4 border-2 text-center clickable-card ${areaSeleccionada === area.id ? "border-primary bg-primary-subtle text-primary shadow" : "border-transparent bg-light text-dark"}`}
                                                     onClick={() => { setAreaSeleccionada(area.id); setDoctorSeleccionado(""); setServicioSeleccionado(""); }}
                                                     style={{ cursor: "pointer", borderRadius: "20px", transition: "all 0.25s ease" }}
@@ -274,7 +282,7 @@ const UserHome = () => {
                                             <h5 className="text-dark fw-bold mb-3" style={{ fontSize: "1.1rem" }}>2. Selecciona un Especialista</h5>
                                             <div className="d-flex flex-column gap-2">
                                                 {doctoresDisponibles.map(doc => (
-                                                    <div 
+                                                    <div
                                                         key={doc.id}
                                                         onClick={() => { setDoctorSeleccionado(doc.id); setServicioSeleccionado(""); }}
                                                         className={`d-flex align-items-center justify-content-between p-3 rounded-4 border-2 ${doctorSeleccionado === doc.id ? "bg-primary text-white border-primary shadow" : "bg-light text-dark border-transparent"}`}
@@ -297,9 +305,9 @@ const UserHome = () => {
                                             {doctorSeleccionado ? (
                                                 <div className="d-flex flex-column gap-2 max-vh-50 overflow-y-auto pe-1">
                                                     {serviciosDisponibles.map((serv, i) => (
-                                                        <button 
-                                                            type="button" 
-                                                            key={i} 
+                                                        <button
+                                                            type="button"
+                                                            key={i}
                                                             onClick={() => setServicioSeleccionado(serv)}
                                                             className={`btn text-start p-3 rounded-4 border-2 fw-medium ${servicioSeleccionado === serv ? "btn-dark text-white border-dark" : "btn-light bg-light text-secondary border-transparent"}`}
                                                             style={{ fontSize: "14px", borderRadius: "14px" }}
@@ -329,7 +337,7 @@ const UserHome = () => {
                             {pasoFormulario === 3 && (
                                 <div className="animate__animated animate__fadeIn">
                                     <div className="row g-4">
-                                        
+
                                         {/* Fecha Calendario */}
                                         <div className="col-12 col-md-5">
                                             <h5 className="text-dark fw-bold mb-3" style={{ fontSize: "1.1rem" }}>4. Elige el Día</h5>
@@ -337,13 +345,13 @@ const UserHome = () => {
                                                 <label className="form-label small fw-bold text-secondary">
                                                     <i className="bi bi-calendar-event me-1"></i> Selecciona fecha disponible:
                                                 </label>
-                                                <input 
-                                                    type="date" 
-                                                    className={`form-control form-control-lg border-2 rounded-3 ${errorFecha ? 'is-invalid border-danger' : 'border-0'}`} 
-                                                    min={hoy} 
-                                                    value={fechaCita} 
-                                                    onChange={handleFechaChange} 
-                                                    required 
+                                                <input
+                                                    type="date"
+                                                    className={`form-control form-control-lg border-2 rounded-3 ${errorFecha ? 'is-invalid border-danger' : 'border-0'}`}
+                                                    min={hoy}
+                                                    value={fechaCita}
+                                                    onChange={handleFechaChange}
+                                                    required
                                                 />
                                                 {errorFecha && (
                                                     <div className="text-danger small mt-2 fw-semibold">
@@ -356,7 +364,7 @@ const UserHome = () => {
                                         {/* Horarios Dinámicos del Doctor */}
                                         <div className="col-12 col-md-7">
                                             <h5 className="text-dark fw-bold mb-3" style={{ fontSize: "1.1rem" }}>5. Horarios del {doctorObjeto?.nombre}</h5>
-                                            
+
                                             {fechaCita && !errorFecha ? (
                                                 <div>
                                                     <p className="text-muted small mb-2">Horas disponibles para el día elegido:</p>
