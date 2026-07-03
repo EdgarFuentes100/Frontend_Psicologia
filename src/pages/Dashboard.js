@@ -1,6 +1,8 @@
 import { NavLink, Routes, Route, Navigate, useLocation } from "react-router-dom";
 import { useAuthContext } from "../auth/AuthProvider";
+import CitasWiew from "../pages/Citas/CitasView";
 import { useState } from "react";
+import HorarioView from "./Horario/HorarioView";
 
 const Dashboard = () => {
   const { user, logout } = useAuthContext();
@@ -9,7 +11,8 @@ const Dashboard = () => {
 
   const menuItems = [
     { path: "consultas", label: "Consultas", roles: ["Doctor", "Administrador"], icon: "bi-people-fill" },
-    { path: "citas", label: "CitasView", roles: ["Doctor", "Administrador"], icon: "bi-people-fill" },
+    { path: "CitasView", label: "Citas", roles: ["Doctor", "Administrador"], icon: "bi-people-fill" },
+    { path: "HorarioView", label: "Horarios", roles: ["Doctor", "Administrador"], icon: "bi-people-fill" },
 
   ];
 
@@ -99,11 +102,12 @@ const Dashboard = () => {
           <span className="navbar-brand fw-bold text-white">{currentLabel}</span>
         </nav>
 
-
         {/* Contenido */}
         <div className="flex-grow-1 p-4 overflow-auto">
           <Routes>
             <Route path="/" element={<Navigate to={allowedMenu[0]?.path || "/dashboard"} />} />
+            {allowedMenu.some(m => m.path === "CitasView") && <Route path="CitasView" element={<CitasWiew />} />}
+            {allowedMenu.some(m => m.path === "HorarioView") && <Route path="HorarioView" element={<HorarioView />} />}
 
             <Route path="*" element={<h2>Página no encontrada</h2>} />
           </Routes>
