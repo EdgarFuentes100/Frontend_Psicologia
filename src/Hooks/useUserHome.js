@@ -21,7 +21,7 @@ export const useUserHome = () => {
     const [horaSeleccionada, setHoraSeleccionada] = useState(null);
 
     const manejarSeleccionArea = (e) => {
-        const item = area.find(a => a.idArea == e.target.value);
+        const item = area.find(a => a.idArea === Number(e.target.value));
         if (!item) return;
         setAreaSeleccionada(item);
         getDoctor(item.idArea);
@@ -29,7 +29,7 @@ export const useUserHome = () => {
     };
 
     const manejarSeleccionDoctor = (e) => {
-        const doc = doctor.find(d => d.idDoctor == e.target.value);
+        const doc = doctor.find(d => d.idDoctor === Number(e.target.value));
         if (!doc) return;
         setDoctorSeleccionado(doc);
         getServicio(doc.idDoctor);
@@ -37,7 +37,7 @@ export const useUserHome = () => {
     };
 
     const manejarSeleccionServicio = (e) => {
-        const ser = servicio.find(s => s.idServicio == e.target.value);
+        const ser = servicio.find(s => s.idServicio === Number(e.target.value));
         if (!ser) return;
         setServicioSeleccionado(ser);
         getHorario(doctorSeleccionado.idDoctor);
