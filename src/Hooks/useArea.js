@@ -6,25 +6,24 @@ const useArea = () => {
     const [area, setArea] = useState([]);
 
     useEffect(() => {
-        getArea();
-    }, []);
+        const getArea = () => {
+            const urlParcial = 'area/obtenerLista';
+            getFetch(urlParcial)
+                .then((data) => {
+                    const { datos, mensaje, ok } = data;
+                    if (ok) {
+                        setArea(datos);
+                    } else {
+                        console.error(mensaje);
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error al obtener áreas:', error);
+                });
+        };
 
-    const getArea = () => {
-        const urlParcial = 'area/obtenerLista';
-        getFetch(urlParcial)
-            .then((data) => {
-                const { datos, mensaje, ok } = data;
-                if (ok) {
-                    setArea(datos);
-                    console.log("area", datos);
-                } else {
-                    console.error(mensaje);
-                }
-            })
-            .catch((error) => {
-                console.error('Error al obtener dientes:', error);
-            });
-    };
+        getArea();
+    }, [getFetch]);
 
     return {
         area
