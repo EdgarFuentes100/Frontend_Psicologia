@@ -21,7 +21,7 @@ const CitasView = () => {
       console.log("Iniciando carga para ID:", idParaConsultar);
       getCita(idParaConsultar);
     }
-  }, [user]);
+  }, [user, getCita]);
 
   useEffect(() => {
     if (cita && cita.length >= 0) {
