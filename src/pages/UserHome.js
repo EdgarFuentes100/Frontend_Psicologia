@@ -4,7 +4,7 @@ import logo from "../Img/Logo.png";
 
 const UserHome = () => {
     const {
-        user, logout, area, doctor, servicio, seccionActiva, setSeccionActiva,
+        logout, area, doctor, servicio, seccionActiva, setSeccionActiva,
         areaSeleccionada, doctorSeleccionado, servicioSeleccionado,
         diaSeleccionado, manejarSeleccionDia, horaSeleccionada, setHoraSeleccionada,
         manejarSeleccionArea, manejarSeleccionDoctor, manejarSeleccionServicio,
