@@ -10,107 +10,90 @@ const Dashboard = () => {
   const [showSidebar, setShowSidebar] = useState(false);
 
   const menuItems = [
-    { path: "consultas", label: "Consultas", roles: ["Doctor", "Administrador"], icon: "bi-people-fill" },
     { path: "CitasView", label: "Citas", roles: ["Doctor", "Administrador"], icon: "bi-people-fill" },
     { path: "HorarioView", label: "Horarios", roles: ["Doctor", "Administrador"], icon: "bi-people-fill" },
-
   ];
 
   const allowedMenu = menuItems.filter(item => item.roles.includes(user.rol));
   const currentLabel = allowedMenu.find(m => location.pathname.includes(m.path))?.label || "Dashboard";
 
   return (
-    <div className="d-flex flex-column flex-md-row vh-100 bg-light">
-
-      {/* Sidebar Desktop */}
-      <div className="d-none d-md-flex flex-column flex-shrink-0 p-3 bg-dark text-white shadow" style={{ width: "250px" }}>
-        <a href="/" className="d-flex align-items-center mb-3 text-white text-decoration-none">
-          <i className="bi bi-heart-pulse-fill fs-4 me-2"></i>
-          <span className="fs-4 fw-bold">Clínica Salud</span>
-        </a>
-        <hr className="border-secondary" />
+    <div className="d-flex vh-100 overflow-hidden">
+      
+      {/* Sidebar Desktop: Oculto en móvil, fijo en desktop */}
+      <aside className="d-none d-md-flex flex-column bg-dark text-white p-3 flex-shrink-0" style={{ width: "260px" }}>
+        <h4 className="text-white mb-4"><i className="bi bi-heart-pulse-fill me-2"></i>Clínica Salud</h4>
+        
+        {/* Sección Usuario recuperada */}
         <div className="mb-4 d-flex align-items-center">
           <div className="rounded-circle bg-primary d-flex justify-content-center align-items-center text-white" style={{ width: "40px", height: "40px" }}>
             {user.nombre.charAt(0)}
           </div>
           <div className="ms-2">
-            <strong>{user.nombre}</strong>
-            <br />
+            <strong>{user.nombre}</strong><br />
             <small className="text-white-50">{user.rol}</small>
           </div>
         </div>
-        <ul className="nav nav-pills flex-column mb-auto">
-          {allowedMenu.map(item => (
-            <li className="nav-item" key={item.path}>
-              <NavLink
-                to={`/dashboard/${item.path}`}
-                className={({ isActive }) => `nav-link d-flex align-items-center mb-1 ${isActive ? "bg-primary text-white rounded" : "text-white text-opacity-75"}`}
-              >
-                <i className={`bi ${item.icon} me-2`}></i>
-                {item.label}
-              </NavLink>
-            </li>
-          ))}
-        </ul>
-        <hr className="border-secondary" />
+
+        <nav className="flex-grow-1">
+          <ul className="nav nav-pills flex-column">
+            {allowedMenu.map(item => (
+              <li className="nav-item" key={item.path}>
+                <NavLink to={`/dashboard/${item.path}`} className={({ isActive }) => `nav-link ${isActive ? "active" : "text-white"}`}>
+                  <i className={`bi ${item.icon} me-2`}></i>{item.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
         <button className="btn btn-outline-light w-100 mt-auto" onClick={logout}>
           <i className="bi bi-box-arrow-right me-2"></i> Cerrar sesión
         </button>
-      </div>
-
-      {/* Offcanvas Mobile */}
-      <div className="d-md-none">
-        <div className={`offcanvas offcanvas-start ${showSidebar ? "show" : ""}`} tabIndex="-1" style={{ visibility: showSidebar ? "visible" : "hidden" }}>
-          <div className="offcanvas-header border-bottom">
-            <h5 className="offcanvas-title">Clínica Salud</h5>
-            <button type="button" className="btn-close text-reset" onClick={() => setShowSidebar(false)}></button>
-          </div>
-          <div className="offcanvas-body">
-            <ul className="nav nav-pills flex-column mb-auto">
-              {allowedMenu.map(item => (
-                <li className="nav-item" key={item.path}>
-                  <NavLink
-                    to={`/dashboard/${item.path}`}
-                    className={({ isActive }) => `nav-link d-flex align-items-center mb-1 ${isActive ? "bg-primary text-white rounded" : "text-dark"}`}
-                    onClick={() => setShowSidebar(false)}
-                  >
-                    <i className={`bi ${item.icon} me-2`}></i>
-                    {item.label}
-                  </NavLink>
-                </li>
-              ))}
-            </ul>
-            <hr />
-            <button className="btn btn-outline-dark w-100" onClick={logout}>
-              <i className="bi bi-box-arrow-right me-2"></i> Cerrar sesión
-            </button>
-          </div>
-        </div>
-      </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="flex-grow-1 d-flex flex-column">
-        {/* Navbar Mobile */}
-        {/* Navbar Mobile */}
-        <nav className="navbar d-md-none px-3" style={{
-          backgroundColor: "#1e293b",
-          background: "linear-gradient(135deg, #1e293b 0%, #334155 100%)"
-        }}>
-          <button className="btn btn-light me-2" onClick={() => setShowSidebar(!showSidebar)}>
-            <i className="bi bi-list fs-4"></i>
+      <main className="d-flex flex-column flex-grow-1 bg-light overflow-hidden">
+        <header className="d-md-none navbar navbar-dark bg-dark p-3">
+          <button className="btn btn-dark" onClick={() => setShowSidebar(true)}>
+            <i className="bi bi-list fs-3"></i>
           </button>
-          <span className="navbar-brand fw-bold text-white">{currentLabel}</span>
-        </nav>
+          <span className="text-white fw-bold">{currentLabel}</span>
+        </header>
 
-        {/* Contenido */}
-        <div className="flex-grow-1 p-4 overflow-auto">
+        <div className="flex-grow-1 overflow-auto p-3 p-md-4">
           <Routes>
             <Route path="/" element={<Navigate to={allowedMenu[0]?.path || "/dashboard"} />} />
             {allowedMenu.some(m => m.path === "CitasView") && <Route path="CitasView" element={<CitasWiew />} />}
             {allowedMenu.some(m => m.path === "HorarioView") && <Route path="HorarioView" element={<HorarioView />} />}
-
-            <Route path="*" element={<h2>Página no encontrada</h2>} />
           </Routes>
+        </div>
+      </main>
+
+      {/* Offcanvas Mobile: Incluye también la info del usuario */}
+      <div className={`offcanvas offcanvas-start ${showSidebar ? "show" : ""}`} style={{ display: showSidebar ? "block" : "none", visibility: showSidebar ? "visible" : "hidden" }}>
+        <div className="offcanvas-header border-bottom">
+          <h5 className="offcanvas-title">Menú</h5>
+          <button type="button" className="btn-close" onClick={() => setShowSidebar(false)}></button>
+        </div>
+        <div className="offcanvas-body d-flex flex-column">
+          {/* Info usuario en el móvil */}
+          <div className="mb-4 p-2 border rounded bg-light">
+             <strong>{user.nombre}</strong><br />
+             <small>{user.rol}</small>
+          </div>
+          <ul className="nav nav-pills flex-column mb-auto">
+            {allowedMenu.map(item => (
+              <li key={item.path} className="nav-item">
+                <NavLink to={`/dashboard/${item.path}`} className="nav-link" onClick={() => setShowSidebar(false)}>
+                  <i className={`bi ${item.icon} me-2`}></i>{item.label}
+                </NavLink>
+              </li>
+            ))}
+          </ul>
+          <button className="btn btn-outline-danger w-100" onClick={logout}>
+             <i className="bi bi-box-arrow-right me-2"></i> Cerrar sesión
+          </button>
         </div>
       </div>
     </div>
