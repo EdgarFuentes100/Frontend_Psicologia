@@ -8,45 +8,36 @@ const CitasView = () => {
 
   const [citas, setCitas] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [filtroEstado, setFiltroEstado] = useState("Pendiente");
+  const [filtroEstado, setFiltroEstado] = useState("Confirmada");
   const [filtroFecha, setFiltroFecha] = useState("");
 
-  // DIAGNÓSTICO: Ver qué es 'user'
   useEffect(() => {
-    console.log("Usuario actual desde contexto:", user);
-    // IMPORTANTE: Cambia 'user.idUsuario' por la propiedad real (ej: 'user.id' o 'user.uid')
-    const idParaConsultar = user?.id;
-
-    if (idParaConsultar) {
-      console.log("Iniciando carga para ID:", idParaConsultar);
-      getCita(idParaConsultar);
+    if (user?.idUsuario) {
+      getCita(user.idUsuario);
     }
-  }, [user, getCita]);
+  }, [user]);
 
   useEffect(() => {
-    if (cita && cita.length >= 0) {
+    if (Array.isArray(cita)) {
       setCitas(cita);
       setLoading(false);
     }
   }, [cita]);
-  // 3. Lógica de filtrado
+
   const citasFiltradas = citas.filter((c) => {
-    if (filtroFecha && c.fecha !== filtroFecha) return false;
-    if (filtroEstado === "Pendiente") return c.estado === "Pendiente";
+    if (filtroFecha && c.fecha?.split("T")[0] !== filtroFecha) return false;
     if (filtroEstado === "Confirmada") return c.estado === "Confirmada";
     if (filtroEstado === "Historial") return c.estado === "Finalizada" || c.estado === "Cancelada";
     return true;
   });
 
-  const totalPendientes = citas.filter((c) => c.estado === "Pendiente").length;
-
-  if (loading) return <div className="p-5 text-center">Cargando agenda...</div>;
+  if (loading) return <div className="p-5 text-center">Cargando citas...</div>;
 
   return (
-    <div className="container-fluid py-4 bg-light" style={{ minHeight: "100vh" }}>
-      {/* Header */}
-      <div className="d-flex justify-content-between pb-3 mb-4 border-bottom">
-        <h4 className="fw-bold">Gestión de Agenda</h4>
+    <div className="container-fluid p-0">
+      {/* HEADER: Ajustado para ser responsivo */}
+      <div className="d-flex flex-wrap justify-content-between align-items-center pb-3 mb-4 border-bottom gap-3">
+        <h4 className="fw-bold m-0">Mis Citas</h4>
         <div className="d-flex align-items-center gap-2">
           <input
             type="date"
@@ -60,30 +51,29 @@ const CitasView = () => {
         </div>
       </div>
 
-      {/* Tabs */}
+      {/* TABS */}
       <ul className="nav nav-tabs mb-3">
-        {["Pendiente", "Confirmada", "Historial"].map((estado) => (
+        {["Confirmada", "Historial"].map((estado) => (
           <li className="nav-item" key={estado}>
             <button
-              className={`nav-link ${filtroEstado === estado ? "active" : ""}`}
+              className={`nav-link ${filtroEstado === estado ? "active fw-bold" : ""}`}
               onClick={() => setFiltroEstado(estado)}
             >
-              {estado === "Pendiente" ? `Solicitudes (${totalPendientes})` : estado}
+              {estado}
             </button>
           </li>
         ))}
       </ul>
 
-      {/* Tabla */}
+      {/* TABLA: Estilizada para pantallas pequeñas */}
       <div className="card border-0 shadow-sm">
         <div className="table-responsive">
-          <table className="table align-middle mb-0">
-            <thead>
-              <tr className="table-light">
+          <table className="table table-hover align-middle mb-0">
+            <thead className="table-light">
+              <tr>
                 <th className="px-4">Paciente</th>
                 <th>Servicio</th>
                 <th>Fecha / Hora</th>
-                <th className="text-end px-4">Acciones</th>
               </tr>
             </thead>
             <tbody>
@@ -91,26 +81,20 @@ const CitasView = () => {
                 citasFiltradas.map((c) => (
                   <tr key={c.idCita}>
                     <td className="px-4">
-                      <span className="fw-bold d-block">{c.nombres} {c.apellidos}</span>
+                      <span className="fw-bold d-block">{c.nombrePaciente} {c.apellidoPaciente}</span>
                       <small className="text-muted">Ref: #{c.idCita}</small>
                     </td>
-                    <td>{c.servicio}</td>
+                    <td>{c.servicio || "---"}</td>
                     <td>
-                      {c.fecha?.split("T")[0]}
-                      <br />
+                      <div className="fw-medium">{c.fecha?.split("T")[0]}</div>
                       <small className="text-muted">{c.horaInicio} - {c.horaFin}</small>
-                    </td>
-                    <td className="text-end px-4">
-                      {c.estado === "Pendiente" && (
-                        <button className="btn btn-sm btn-success px-3">Aceptar</button>
-                      )}
                     </td>
                   </tr>
                 ))
               ) : (
                 <tr>
-                  <td colSpan="4" className="text-center py-4 text-muted">
-                    No hay citas en este estado.
+                  <td colSpan="3" className="text-center py-5 text-muted">
+                    No se encontraron citas.
                   </td>
                 </tr>
               )}
