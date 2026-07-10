@@ -143,9 +143,14 @@ export const useUserHome = () => {
         // 4. Manejamos el resultado
         if (respuesta.ok) {
             alert("¡Cita agendada exitosamente!");
-            // Opcional: limpiar estados después de agendar
-            // setPasoFormulario(1); 
-            // setHoraSeleccionada(null);
+            // Actualizar horarios ocupados nuevamente
+            getCitasOcupadas(
+                doctorSeleccionado.idDoctor,
+                diaSeleccionado.fecha
+            );
+
+            // Quitar la hora seleccionada
+            setHoraSeleccionada(null);
         } else {
             alert("Error al agendar: " + (respuesta.mensaje || "Ocurrió un error"));
             console.error("Detalle del error:", respuesta);
