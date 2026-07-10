@@ -8,7 +8,7 @@ const UserHome = () => {
         areaSeleccionada, doctorSeleccionado, servicioSeleccionado,
         diaSeleccionado, manejarSeleccionDia, horaSeleccionada, setHoraSeleccionada,
         manejarSeleccionArea, manejarSeleccionDoctor, manejarSeleccionServicio,
-        proximosDias, horasDisponibles
+        proximosDias, horasDisponibles, manejarAgendarCita
     } = useUserHome();
 
     return (
@@ -18,10 +18,10 @@ const UserHome = () => {
                 <div className="container-xl d-flex flex-wrap justify-content-between align-items-center py-2 gap-2">
                     <div className="d-flex align-items-center gap-2">
                         {/* CORRECCIÓN: Etiqueta img única y bien formada */}
-                        <img 
-                            src={logo} 
-                            alt="Logo Mente Dinámica" 
-                            style={{ width: "50px", height: "50px", objectFit: "contain" }} 
+                        <img
+                            src={logo}
+                            alt="Logo Mente Dinámica"
+                            style={{ width: "50px", height: "50px", objectFit: "contain" }}
                         />
                         <div className="d-none d-sm-block">
                             <small className="text-muted d-block fw-bold" style={{ fontSize: "9px" }}>CLÍNICA</small>
@@ -112,7 +112,11 @@ const UserHome = () => {
                                     <span className="fw-bold">Total:</span>
                                     <span className="fs-4 fw-bold text-primary">${servicioSeleccionado?.precio || "0.00"}</span>
                                 </div>
-                                <button className="btn btn-primary w-100 py-2 fw-bold" disabled={!horaSeleccionada} onClick={() => alert("Cita Agendada")}>
+                                <button
+                                    className="btn btn-primary w-100 py-2 fw-bold"
+                                    disabled={!horaSeleccionada}
+                                    onClick={manejarAgendarCita}
+                                >
                                     Confirmar
                                 </button>
                             </div>

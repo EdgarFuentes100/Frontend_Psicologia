@@ -4,9 +4,11 @@ import { useArea } from "./useArea";
 import { useDoctor } from "./useDoctor";
 import { useServicio } from "./useServicio";
 import { useHorario } from "./useHorario";
+import { useFetch } from "../api/useFetch";
 
 export const useUserHome = () => {
     const { user, logout } = useAuthContext();
+    const { postFetch } = useFetch();
     const { area } = useArea();
     const { doctor, getDoctor } = useDoctor();
     const { servicio, getServicio } = useServicio();
@@ -25,6 +27,7 @@ export const useUserHome = () => {
         if (!item) return;
         setAreaSeleccionada(item);
         getDoctor(item.idArea);
+        setServicioSeleccionado(null);
         setPasoFormulario(2);
     };
 
@@ -114,11 +117,46 @@ export const useUserHome = () => {
         return slots;
     }, [diaSeleccionado, horario, servicioSeleccionado, citasOcupadas]);
 
+
+    const manejarAgendarCita = async () => {
+        // 1. Validamos datos
+        if (!doctorSeleccionado || !servicioSeleccionado || !diaSeleccionado || !horaSeleccionada) {
+            alert("Por favor, complete todos los campos.");
+            return;
+        }
+
+        // 2. Preparamos el objeto
+        const nuevaCita = {
+            idUsuario: user.id,
+            idDoctor: doctorSeleccionado.idDoctor,
+            idServicio: servicioSeleccionado.idServicio,
+            fecha: diaSeleccionado.fecha,
+            horaInicio: horaSeleccionada
+        };
+
+        console.log(nuevaCita);
+
+        // 3. Enviamos al servidor usando tu hook
+        const respuesta = await postFetch('cita/registrar', nuevaCita);
+
+        console.log(respuesta);
+        // 4. Manejamos el resultado
+        if (respuesta.ok) {
+            alert("¡Cita agendada exitosamente!");
+            // Opcional: limpiar estados después de agendar
+            // setPasoFormulario(1); 
+            // setHoraSeleccionada(null);
+        } else {
+            alert("Error al agendar: " + (respuesta.mensaje || "Ocurrió un error"));
+            console.error("Detalle del error:", respuesta);
+        }
+    };
+
     return {
         user, logout, area, doctor, servicio, seccionActiva, setSeccionActiva,
         pasoFormulario, areaSeleccionada, doctorSeleccionado, servicioSeleccionado,
         diaSeleccionado, manejarSeleccionDia, horaSeleccionada, setHoraSeleccionada,
         manejarSeleccionArea, manejarSeleccionDoctor, manejarSeleccionServicio,
-        proximosDias, horasDisponibles
+        proximosDias, horasDisponibles, manejarAgendarCita
     };
 };
