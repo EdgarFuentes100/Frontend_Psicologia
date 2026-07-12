@@ -119,6 +119,7 @@ export const useUserHome = () => {
 
 
     const manejarAgendarCita = async () => {
+        console.log(user, "shhshsh");
         // 1. Validamos datos
         if (!doctorSeleccionado || !servicioSeleccionado || !diaSeleccionado || !horaSeleccionada) {
             alert("Por favor, complete todos los campos.");
@@ -127,7 +128,7 @@ export const useUserHome = () => {
 
         // 2. Preparamos el objeto
         const nuevaCita = {
-            idUsuario: user.id,
+            idPersona: user.idPersona,
             idDoctor: doctorSeleccionado.idDoctor,
             idServicio: servicioSeleccionado.idServicio,
             fecha: diaSeleccionado.fecha,
