@@ -27,7 +27,7 @@ function Login() {
       setFraseActual((prev) => (prev + 1) % frases.length);
     }, 8000);
     return () => clearInterval(interval);
-  }, []);
+  }, [frases.length]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -80,7 +80,7 @@ function Login() {
         <h1 className="motivational-text">{frases[fraseActual]}</h1>
       </div>
 
-      <div 
+      <div
         className="d-flex flex-column align-items-center justify-content-center p-3 p-md-4"
         style={{
           width: '100%',
@@ -121,7 +121,7 @@ function Login() {
                 fontWeight: 'bold'
               }}
             />
-            
+
             <div className="d-flex justify-content-center gap-2 mt-2">
               {[1, 2, 3, 4].map((i) => (
                 <div key={i} style={{
