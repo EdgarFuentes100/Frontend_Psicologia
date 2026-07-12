@@ -5,15 +5,18 @@ import { useDoctor } from "./useDoctor";
 import { useServicio } from "./useServicio";
 import { useHorario } from "./useHorario";
 import { useFetch } from "../api/useFetch";
+import { useCita } from "./useCita";
 
 export const useUserHome = () => {
     const { user, logout } = useAuthContext();
     const { postFetch } = useFetch();
     const { area } = useArea();
+    const { misCitas, getMisCitas } = useCita();
     const { doctor, getDoctor } = useDoctor();
     const { servicio, getServicio } = useServicio();
     const { horario, getHorario, getCitasOcupadas, citasOcupadas } = useHorario();
 
+    // Estados
     const [seccionActiva, setSeccionActiva] = useState("agendar");
     const [pasoFormulario, setPasoFormulario] = useState(1);
     const [areaSeleccionada, setAreaSeleccionada] = useState(null);
@@ -21,14 +24,36 @@ export const useUserHome = () => {
     const [servicioSeleccionado, setServicioSeleccionado] = useState(null);
     const [diaSeleccionado, setDiaSeleccionado] = useState(null);
     const [horaSeleccionada, setHoraSeleccionada] = useState(null);
+    const [modalConfig, setModalConfig] = useState({ show: false, mensaje: '', tipo: '' });
+
+    const mostrarModal = (mensaje, tipo) => {
+        setModalConfig({ show: true, mensaje, tipo });
+    };
+
+    const limpiarFormulario = () => {
+        setPasoFormulario(1);
+        setAreaSeleccionada(null);
+        setDoctorSeleccionado(null);
+        setServicioSeleccionado(null);
+        setDiaSeleccionado(null);
+        setHoraSeleccionada(null);
+    };
 
     const manejarSeleccionArea = (e) => {
-        const item = area.find(a => a.idArea === Number(e.target.value));
-        if (!item) return;
-        setAreaSeleccionada(item);
-        getDoctor(item.idArea);
+        const id = Number(e.target.value);
+        const item = area.find(a => a.idArea === id);
+
+        setAreaSeleccionada(item || null);
+
+        // CAMBIO: Limpiamos todo lo que depende del área
+        setDoctorSeleccionado(null);
         setServicioSeleccionado(null);
-        setPasoFormulario(2);
+        setDiaSeleccionado(null);
+        setHoraSeleccionada(null);
+
+        if (item) {
+            getDoctor(item.idArea);
+        }
     };
 
     const manejarSeleccionDoctor = (e) => {
@@ -52,6 +77,38 @@ export const useUserHome = () => {
         setDiaSeleccionado(dia);
         getCitasOcupadas(doctorSeleccionado.idDoctor, dia.fecha);
         setHoraSeleccionada(null);
+    };
+
+    // Lógica de agendado
+    const manejarAgendarCita = async () => {
+        if (!doctorSeleccionado || !servicioSeleccionado || !diaSeleccionado || !horaSeleccionada) {
+            mostrarModal("Por favor, complete todos los campos.", "error");
+            return;
+        }
+
+        const nuevaCita = {
+            idPersona: user.idPersona,
+            idDoctor: doctorSeleccionado.idDoctor,
+            idServicio: servicioSeleccionado.idServicio,
+            fecha: diaSeleccionado.fecha,
+            horaInicio: horaSeleccionada
+        };
+
+        const respuesta = await postFetch('cita/registrar', nuevaCita);
+
+        if (respuesta.ok) {
+            mostrarModal("¡Cita agendada exitosamente!", "exito");
+            getCitasOcupadas(doctorSeleccionado.idDoctor, diaSeleccionado.fecha);
+            limpiarFormulario();
+            obtenerMisCitas();
+            setSeccionActiva("mis-citas");
+        } else {
+            mostrarModal("Error al agendar: " + (respuesta.mensaje || "Ocurrió un error"), "error");
+        }
+    };
+
+    const obtenerMisCitas = () => {
+        getMisCitas(user.idUsuario);
     };
 
     const proximosDias = useMemo(() => {
@@ -98,71 +155,20 @@ export const useUserHome = () => {
 
         const slots = [];
         while (t < limite) {
-            // 1. Generamos el formato "HH:MM" (siempre con 2 dígitos)
             const str = `${String(t.getHours()).padStart(2, '0')}:${String(t.getMinutes()).padStart(2, '0')}`;
-
-            // 2. Comparamos
-            const ocupado = citasOcupadas?.some(c => {
-                // Obtenemos la hora de la BD
-                const horaBD = c.horaInicio.toString().trim();
-
-                // Comparamos, asegurándonos de que ambos sean "HH:MM"
-                // Si tu BD devuelve "13:00", esto funcionará.
-                return horaBD === str;
-            });
-
+            const ocupado = citasOcupadas?.some(c => c.horaInicio.toString().trim() === str);
             slots.push({ hora: str, disponible: !ocupado });
             t.setMinutes(t.getMinutes() + 45);
         }
         return slots;
     }, [diaSeleccionado, horario, servicioSeleccionado, citasOcupadas]);
 
-
-    const manejarAgendarCita = async () => {
-        console.log(user, "shhshsh");
-        // 1. Validamos datos
-        if (!doctorSeleccionado || !servicioSeleccionado || !diaSeleccionado || !horaSeleccionada) {
-            alert("Por favor, complete todos los campos.");
-            return;
-        }
-
-        // 2. Preparamos el objeto
-        const nuevaCita = {
-            idPersona: user.idPersona,
-            idDoctor: doctorSeleccionado.idDoctor,
-            idServicio: servicioSeleccionado.idServicio,
-            fecha: diaSeleccionado.fecha,
-            horaInicio: horaSeleccionada
-        };
-
-        console.log(nuevaCita);
-
-        // 3. Enviamos al servidor usando tu hook
-        const respuesta = await postFetch('cita/registrar', nuevaCita);
-
-        console.log(respuesta);
-        // 4. Manejamos el resultado
-        if (respuesta.ok) {
-            alert("¡Cita agendada exitosamente!");
-            // Actualizar horarios ocupados nuevamente
-            getCitasOcupadas(
-                doctorSeleccionado.idDoctor,
-                diaSeleccionado.fecha
-            );
-
-            // Quitar la hora seleccionada
-            setHoraSeleccionada(null);
-        } else {
-            alert("Error al agendar: " + (respuesta.mensaje || "Ocurrió un error"));
-            console.error("Detalle del error:", respuesta);
-        }
-    };
-
     return {
         user, logout, area, doctor, servicio, seccionActiva, setSeccionActiva,
         pasoFormulario, areaSeleccionada, doctorSeleccionado, servicioSeleccionado,
         diaSeleccionado, manejarSeleccionDia, horaSeleccionada, setHoraSeleccionada,
         manejarSeleccionArea, manejarSeleccionDoctor, manejarSeleccionServicio,
-        proximosDias, horasDisponibles, manejarAgendarCita
+        proximosDias, horasDisponibles, manejarAgendarCita, misCitas, obtenerMisCitas,
+        modalConfig, setModalConfig, limpiarFormulario
     };
 };
