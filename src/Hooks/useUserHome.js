@@ -11,7 +11,7 @@ export const useUserHome = () => {
     const { user, logout } = useAuthContext();
     const { postFetch } = useFetch();
     const { area } = useArea();
-    const { misCitas, getMisCitas } = useCita();
+    const { misCitas, getMisCitas, pagar } = useCita();
     const { doctor, getDoctor } = useDoctor();
     const { servicio, getServicio } = useServicio();
     const { horario, getHorario, getCitasOcupadas, citasOcupadas } = useHorario();
@@ -81,6 +81,7 @@ export const useUserHome = () => {
 
     // Lógica de agendado
     const manejarAgendarCita = async () => {
+        pagar();
         if (!doctorSeleccionado || !servicioSeleccionado || !diaSeleccionado || !horaSeleccionada) {
             mostrarModal("Por favor, complete todos los campos.", "error");
             return;
