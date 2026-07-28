@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useUserHome } from "../Hooks/useUserHome";
 import logo from "../Img/Logo.png";
-import { ModalNotificacion } from "../components/ModalNotificacion"; // Asegúrate de tener esta ruta
+import { ModalNotificacion } from "../components/ModalNotificacion"; 
 
 const UserHome = () => {
     const {
@@ -9,7 +9,8 @@ const UserHome = () => {
         areaSeleccionada, doctorSeleccionado, servicioSeleccionado,
         diaSeleccionado, manejarSeleccionDia, horaSeleccionada, setHoraSeleccionada,
         manejarSeleccionArea, manejarSeleccionDoctor, manejarSeleccionServicio,
-        proximosDias, horasDisponibles, manejarAgendarCita, misCitas, obtenerMisCitas, modalConfig, setModalConfig
+        proximosDias, horasDisponibles, manejarAgendarCita, misCitas, obtenerMisCitas, 
+        modalConfig, setModalConfig, cargando
     } = useUserHome();
 
     const [subSeccion, setSubSeccion] = useState("proximas");
@@ -18,13 +19,25 @@ const UserHome = () => {
     const citasPasadas = misCitas?.filter(c => new Date(c.fecha) < hoy) || [];
 
     return (
-        <div className="min-vh-100 bg-light">
+        <div className="min-vh-100 bg-light position-relative">
+            
+            {/* LOADER DE PANTALLA COMPLETA */}
+            {cargando && (
+                <div 
+                    className="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-white bg-opacity-75"
+                    style={{ zIndex: 1050 }}
+                >
+                    <div className="spinner-border text-primary" role="status" style={{ width: "3rem", height: "3rem" }}>
+                        <span className="visually-hidden">Cargando...</span>
+                    </div>
+                    <p className="mt-3 fw-bold text-primary">Generando pasarela de pago, por favor espere...</p>
+                </div>
+            )}
+
             {/* NAVBAR RESPONSIVO */}
             <nav className="navbar bg-white border-bottom shadow-sm sticky-top">
                 <div className="container-xl d-flex align-items-center justify-content-between px-2">
-
                     <div className="d-flex align-items-center flex-grow-1">
-                        {/* Logo más grande */}
                         <img src={logo} alt="Logo" className="img-fluid" style={{ maxWidth: "60px" }} />
                         <span className="fw-bold ms-2 d-none d-sm-block text-truncate">Mente Dinámica</span>
                     </div>
@@ -81,7 +94,6 @@ const UserHome = () => {
 
                                 <div className="mt-3">
                                     <label className="small fw-bold text-muted text-uppercase">Fecha y Hora</label>
-                                    {/* Botones de Fecha más grandes */}
                                     <div className="d-flex gap-2 overflow-x-auto py-3 flex-nowrap">
                                         {proximosDias.map((d, i) => (
                                             <div key={i} className={`p-3 border rounded text-center ${diaSeleccionado?.fecha === d.fecha ? "bg-primary text-white" : (d.esAtendible ? "bg-white" : "bg-light text-muted")}`}
@@ -91,7 +103,7 @@ const UserHome = () => {
                                             </div>
                                         ))}
                                     </div>
-                                    {/* Botones de Hora sin mensaje */}
+                                    
                                     <div className="d-flex flex-wrap gap-2 mt-3">
                                         {horasDisponibles.map((h, i) => (
                                             <button
@@ -126,7 +138,21 @@ const UserHome = () => {
                                     <span className="fw-bold">Total a pagar:</span>
                                     <span className="fs-4 fw-bold text-primary">${servicioSeleccionado?.precio || "0.00"}</span>
                                 </div>
-                                <button className="btn btn-primary w-100 py-2" disabled={!horaSeleccionada} onClick={manejarAgendarCita}>Confirmar Cita</button>
+                                
+                                <button 
+                                    className="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2" 
+                                    disabled={!horaSeleccionada || cargando} 
+                                    onClick={manejarAgendarCita}
+                                >
+                                    {cargando ? (
+                                        <>
+                                            <span className="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                                            Generando enlace...
+                                        </>
+                                    ) : (
+                                        "Confirmar Cita"
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -142,16 +168,13 @@ const UserHome = () => {
                         <div className="row g-3">
                             {(subSeccion === "proximas" ? citasProximas : citasPasadas).map((cita) => (
                                 <div key={cita.idCita} className="col-12 col-md-6 col-lg-4">
-                                    {/* Tarjeta con borde lateral grueso para jerarquía */}
                                     <div className="card shadow-sm border-0 h-100" style={{ borderLeft: `5px solid ${cita.estado === "Finalizada" ? "#6c757d" : "#0d6efd"}` }}>
                                         <div className="card-body p-3">
-                                            {/* Header de la tarjeta */}
                                             <div className="d-flex justify-content-between align-items-center mb-2">
                                                 <span className="badge bg-light text-dark border">{cita.estado}</span>
                                                 <small className="fw-bold text-muted">{new Date(cita.fecha).toLocaleDateString()}</small>
                                             </div>
 
-                                            {/* Contenido principal con mayor contraste */}
                                             <h6 className="fw-bold text-dark mb-1">{cita.detalleServicio.split(" - ")[0]}</h6>
                                             <p className="text-secondary small mb-2">{cita.nombreDoctor}</p>
 
@@ -160,7 +183,6 @@ const UserHome = () => {
                                                 <span className="fw-bold text-dark">{cita.horaInicio.slice(0, 5)} - {cita.horaFin.slice(0, 5)}</span>
                                             </div>
 
-                                            {/* Botón de acción destacado */}
                                             {cita.estado !== "Finalizada" ? (
                                                 <a
                                                     href={cita.link?.startsWith("http") ? cita.link : `https://${cita.link || "meet.google.com"}`}
@@ -184,13 +206,13 @@ const UserHome = () => {
                         </div>
                     </div>
                 )}
+
                 <ModalNotificacion
                     show={modalConfig.show}
                     mensaje={modalConfig.mensaje}
                     tipo={modalConfig.tipo}
                     onClose={() => {
                         setModalConfig(prev => ({ ...prev, show: false }));
-                        // Si la acción fue un éxito al agendar, cambiamos a la sección de citas
                         if (modalConfig.tipo === 'exito') {
                             setSeccionActiva("mis-citas");
                         }

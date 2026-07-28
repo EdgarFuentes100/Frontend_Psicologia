@@ -26,6 +26,9 @@ export const useUserHome = () => {
     const [horaSeleccionada, setHoraSeleccionada] = useState(null);
     const [modalConfig, setModalConfig] = useState({ show: false, mensaje: '', tipo: '' });
 
+    // Estado de carga para el botón de agendar/pago
+    const [cargando, setCargando] = useState(false);
+
     const mostrarModal = (mensaje, tipo) => {
         setModalConfig({ show: true, mensaje, tipo });
     };
@@ -45,7 +48,6 @@ export const useUserHome = () => {
 
         setAreaSeleccionada(item || null);
 
-        // CAMBIO: Limpiamos todo lo que depende del área
         setDoctorSeleccionado(null);
         setServicioSeleccionado(null);
         setDiaSeleccionado(null);
@@ -79,32 +81,45 @@ export const useUserHome = () => {
         setHoraSeleccionada(null);
     };
 
-    // Lógica de agendado
     const manejarAgendarCita = async () => {
-        pagar();
         if (!doctorSeleccionado || !servicioSeleccionado || !diaSeleccionado || !horaSeleccionada) {
             mostrarModal("Por favor, complete todos los campos.", "error");
             return;
         }
 
-        const nuevaCita = {
-            idPersona: user.idPersona,
-            idDoctor: doctorSeleccionado.idDoctor,
-            idServicio: servicioSeleccionado.idServicio,
-            fecha: diaSeleccionado.fecha,
-            horaInicio: horaSeleccionada
-        };
+        try {
+            setCargando(true); // Activa el loader
 
-        const respuesta = await postFetch('cita/registrar', nuevaCita);
+            const datosCompletos = {
+                idPersona: user.idPersona,
+                idDoctor: doctorSeleccionado.idDoctor,
+                idServicio: servicioSeleccionado.idServicio,
+                fecha: diaSeleccionado.fecha,
+                horaInicio: horaSeleccionada,
+                monto: servicioSeleccionado.precio,
+                nombreProducto: servicioSeleccionado.servicio
+            };
 
-        if (respuesta.ok) {
-            mostrarModal("¡Cita agendada exitosamente!", "exito");
-            getCitasOcupadas(doctorSeleccionado.idDoctor, diaSeleccionado.fecha);
-            limpiarFormulario();
-            obtenerMisCitas();
-            setSeccionActiva("mis-citas");
-        } else {
-            mostrarModal("Error al agendar: " + (respuesta.mensaje || "Ocurrió un error"), "error");
+            console.log("Enviando datos completos al backend:", datosCompletos);
+
+            const respuesta = await postFetch('wompi/crear-pago', datosCompletos);
+
+            console.log("Respuesta completa del backend:", respuesta);
+
+            const enlaceFinal = respuesta?.urlPago || respuesta?.datos?.urlPago || respuesta?.datos?.urlEnlace;
+            if (enlaceFinal) {
+                limpiarFormulario();
+                // Redirige directamente a la pasarela de Wompi (mantenemos cargando en true mientras redirige)
+                window.location.href = enlaceFinal;
+            } else {
+                mostrarModal("Error: " + (respuesta?.mensaje || respuesta?.datos?.mensaje || "No se pudo generar el enlace de pago"), "error");
+                setCargando(false); // Desactiva si hay error
+            }
+
+        } catch (error) {
+            console.error("Error al procesar la cita y el pago:", error);
+            mostrarModal("Hubo un error de conexión al procesar la solicitud.", "error");
+            setCargando(false); // Desactiva si hay error
         }
     };
 
@@ -170,6 +185,6 @@ export const useUserHome = () => {
         diaSeleccionado, manejarSeleccionDia, horaSeleccionada, setHoraSeleccionada,
         manejarSeleccionArea, manejarSeleccionDoctor, manejarSeleccionServicio,
         proximosDias, horasDisponibles, manejarAgendarCita, misCitas, obtenerMisCitas,
-        modalConfig, setModalConfig, limpiarFormulario
+        modalConfig, setModalConfig, limpiarFormulario, cargando
     };
 };
