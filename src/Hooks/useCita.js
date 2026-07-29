@@ -2,7 +2,7 @@ import { useState, useCallback } from "react";
 import { useFetch } from "../api/useFetch";
 
 const useCita = () => {
-    const { getFetch, postFetch } = useFetch();
+    const { getFetch } = useFetch();
     const [cita, seCita] = useState([]);
     const [misCitas, setMisCitas] = useState([]);
 
@@ -43,45 +43,11 @@ const useCita = () => {
 
     }, [getFetch]);
 
-
-const pagar = useCallback((idUsuario) => {
-    const urlParcial = `wompi/crear-pago`;
-    
-    // Objeto con los datos que necesita el backend/Wompi
-    const datosPago = {
-        idUsuario: idUsuario
-        // Agrega aquí otros campos necesarios (ej. monto, concepto, etc.)
-    };
-
-    console.log("📍 [FRONTEND] Enviando solicitud de pago para usuario:", idUsuario);
-
-    // Cambiamos a postFetch y pasamos el cuerpo con los datos
-    postFetch(urlParcial, datosPago)
-        .then((data) => {
-            console.log("📍 [FRONTEND] Respuesta recibida del servidor:", data);
-            
-            const { data: resultadoWompi, success, message } = data;
-
-            if (success) {
-                console.log("✅ Link de pago generado:", resultadoWompi);
-                // Si Wompi devuelve la URL del enlace, puedes redireccionar así:
-                // window.location.href = resultadoWompi.urlEnlace;
-            } else {
-                console.error("❌ Error en la respuesta:", message);
-            }
-        })
-        .catch((error) => {
-            console.error("❌ Error de red o en la petición:", error);
-        });
-
-}, []);
-
     return {
         cita,
         getCita,
         misCitas,
-        getMisCitas,
-        pagar
+        getMisCitas
     };
 };
 
