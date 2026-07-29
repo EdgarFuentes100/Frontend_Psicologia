@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useUserHome } from "../Hooks/useUserHome";
 import logo from "../Img/Logo.png";
-import { ModalNotificacion } from "../components/ModalNotificacion"; 
+import { ModalNotificacion } from "../components/ModalNotificacion";
 
 const UserHome = () => {
     const {
@@ -9,7 +9,7 @@ const UserHome = () => {
         areaSeleccionada, doctorSeleccionado, servicioSeleccionado,
         diaSeleccionado, manejarSeleccionDia, horaSeleccionada, setHoraSeleccionada,
         manejarSeleccionArea, manejarSeleccionDoctor, manejarSeleccionServicio,
-        proximosDias, horasDisponibles, manejarAgendarCita, misCitas, obtenerMisCitas, 
+        proximosDias, horasDisponibles, manejarAgendarCita, misCitas, obtenerMisCitas,
         modalConfig, setModalConfig, cargando
     } = useUserHome();
 
@@ -20,10 +20,10 @@ const UserHome = () => {
 
     return (
         <div className="min-vh-100 bg-light position-relative">
-            
+
             {/* LOADER DE PANTALLA COMPLETA */}
             {cargando && (
-                <div 
+                <div
                     className="position-fixed top-0 start-0 w-100 h-100 d-flex flex-column align-items-center justify-content-center bg-white bg-opacity-75"
                     style={{ zIndex: 1050 }}
                 >
@@ -103,7 +103,7 @@ const UserHome = () => {
                                             </div>
                                         ))}
                                     </div>
-                                    
+
                                     <div className="d-flex flex-wrap gap-2 mt-3">
                                         {horasDisponibles.map((h, i) => (
                                             <button
@@ -138,10 +138,10 @@ const UserHome = () => {
                                     <span className="fw-bold">Total a pagar:</span>
                                     <span className="fs-4 fw-bold text-primary">${servicioSeleccionado?.precio || "0.00"}</span>
                                 </div>
-                                
-                                <button 
-                                    className="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2" 
-                                    disabled={!horaSeleccionada || cargando} 
+
+                                <button
+                                    className="btn btn-primary w-100 py-2 d-flex align-items-center justify-content-center gap-2"
+                                    disabled={!horaSeleccionada || cargando}
                                     onClick={manejarAgendarCita}
                                 >
                                     {cargando ? (
@@ -183,21 +183,37 @@ const UserHome = () => {
                                                 <span className="fw-bold text-dark">{cita.horaInicio.slice(0, 5)} - {cita.horaFin.slice(0, 5)}</span>
                                             </div>
 
-                                            {cita.estado !== "Finalizada" ? (
-                                                <a
-                                                    href={cita.link?.startsWith("http") ? cita.link : `https://${cita.link || "meet.google.com"}`}
-                                                    target="_blank"
-                                                    rel="noreferrer"
-                                                    className="btn btn-primary w-100 fw-bold d-flex align-items-center justify-content-center gap-2"
-                                                >
-                                                    <i className="bi bi-camera-video-fill"></i>
-                                                    Conectar a Meet
-                                                </a>
-                                            ) : (
+                                            {cita.estado === "Finalizada" ? (
+
                                                 <button className="btn btn-outline-secondary w-100" disabled>
                                                     <i className="bi bi-check-circle-fill me-2"></i>
                                                     Finalizada
                                                 </button>
+
+                                            ) : cita.estadoPago === "Pagado" ? (
+
+                                                <a
+                                                    href={cita.linkMeet}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="btn btn-primary w-100 fw-bold"
+                                                >
+                                                    <i className="bi bi-camera-video-fill me-2"></i>
+                                                    Conectar a Meet
+                                                </a>
+
+                                            ) : (
+
+                                                <a
+                                                    href={cita.linkWompi}
+                                                    target="_blank"
+                                                    rel="noreferrer"
+                                                    className="btn btn-success w-100 fw-bold"
+                                                >
+                                                    <i className="bi bi-credit-card-fill me-2"></i>
+                                                    Pagar ahora
+                                                </a>
+
                                             )}
                                         </div>
                                     </div>
