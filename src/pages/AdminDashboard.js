@@ -9,9 +9,9 @@ import AdminCitas from "./admin/AdminCitas";
 import { useAuthContext } from "../auth/AuthProvider";
 
 const AdminDashboard = () => {
-    const { user, logout } = useAuthContext();
+    const { logout } = useAuthContext();
     const [seccionActiva, setSeccionActiva] = useState("inicio");
-    const [cargando, setCargando] = useState(false);
+    const [cargando] = useState(false);
 
     // Función o diccionario para renderizar el subcomponente correspondiente
     const renderizarContenido = () => {
