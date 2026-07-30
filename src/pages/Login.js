@@ -32,11 +32,11 @@ function Login() {
   // Función para formatear el DUI automáticamente (00000000-0)
   const handleDuiChange = (e) => {
     let valor = e.target.value.replace(/\D/g, ""); // Extrae solo los números
-    
+
     if (valor.length > 8) {
       valor = valor.slice(0, 8) + "-" + valor.slice(8, 9); // Inserta el guion
     }
-    
+
     if (valor.length > 10) {
       valor = valor.slice(0, 10); // Máximo 10 caracteres (8 números + guion + 1 verificador)
     }
@@ -56,14 +56,21 @@ function Login() {
 
     try {
       const resp = await postFetch("auth/login", { dui: dui.trim(), pin });
-      
+
       if (!resp.ok) {
         setErrorMsg(resp.mensaje || "Credenciales incorrectas");
         return;
       }
-      
+
       setUser(resp.datos);
-      navigate(resp.datos.rol === "Paciente" ? "/userHome" : "/dashboard", { replace: true });
+      navigate(
+        resp.datos.rol === "Paciente"
+          ? "/userHome"
+          : resp.datos.rol === "Administrador"
+            ? "/adminDashboard"
+            : "/dashboard",
+        { replace: true }
+      );
     } catch (error) {
       setErrorMsg("Ocurrió un error al intentar iniciar sesión");
     } finally {

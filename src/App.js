@@ -4,6 +4,7 @@ import { useAuthContext } from "./auth/AuthProvider";
 import { Login } from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import UserHome from "./pages/UserHome";
+import AdminDashboard from "./pages/AdminDashboard";
 
 function App() {
   const { user } = useAuthContext();
@@ -16,8 +17,10 @@ function App() {
         return "/userHome";
 
       case "Doctor":
-      case "Administrador":
         return "/dashboard";
+
+      case "Administrador": // <-- 2. Separas el Administrador
+        return "/adminDashboard";
 
       default:
         return "/login";
@@ -27,6 +30,7 @@ function App() {
   return (
     <Routes>
 
+      {/* Ruta Login */}
       <Route
         path="/login"
         element={
@@ -36,6 +40,7 @@ function App() {
         }
       />
 
+      {/* Ruta Paciente */}
       <Route
         path="/userHome/*"
         element={
@@ -45,17 +50,27 @@ function App() {
         }
       />
 
+      {/* Ruta Doctor */}
       <Route
         path="/dashboard/*"
         element={
-          user &&
-          (user.rol === "Doctor" ||
-           user.rol === "Administrador")
+          user?.rol === "Doctor"
             ? <Dashboard />
             : <Navigate to="/login" replace />
         }
       />
 
+      {/* 3. Ruta Exclusiva Administrador */}
+      <Route
+        path="/adminDashboard/*"
+        element={
+          user?.rol === "Administrador"
+            ? <AdminDashboard />
+            : <Navigate to="/login" replace />
+        }
+      />
+
+      {/* Comodín / Redirección */}
       <Route
         path="*"
         element={<Navigate to={getHomeRoute()} replace />}
