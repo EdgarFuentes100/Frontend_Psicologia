@@ -39,6 +39,12 @@ const CitasView = () => {
     Cancelada: { clase: "bg-danger-subtle text-danger", label: "Cancelada" }
   };
 
+  // Configuración de los estados de pago para los badges
+  const configPagos = {
+    Pagado: { clase: "bg-success-subtle text-success", label: "Pagado" },
+    Pendiente: { clase: "bg-warning-subtle text-warning", label: "Pendiente" }
+  };
+
   const citasFiltradas = citas.filter((c) => {
     if (filtroFecha && c.fecha?.split("T")[0] !== filtroFecha) return false;
     if (filtroEstado === "Confirmada") return c.estado === "Confirmada";
@@ -84,6 +90,7 @@ const CitasView = () => {
                 <th>Fecha</th>
                 <th>Horario</th>
                 <th>Estado</th>
+                <th>Pago</th>
                 <th className="text-center">Acción</th>
               </tr>
             </thead>
@@ -91,6 +98,8 @@ const CitasView = () => {
               {citasPaginadas.length > 0 ? (
                 citasPaginadas.map((c) => {
                   const estadoCfg = configEstados[c.estado] || { clase: "bg-secondary-subtle text-secondary", label: c.estado };
+                  const pagoCfg = configPagos[c.estadoPago] || { clase: "bg-secondary-subtle text-secondary", label: c.estadoPago || "Pendiente" };
+                  
                   const [tituloServicio] = c.detalleServicio?.replace("Servicio: ", "").split(" - ") || ["---"];
                   const detalleExtra = c.detalleServicio?.split(" - ")[2] || "";
 
@@ -107,10 +116,21 @@ const CitasView = () => {
                       <td><div className="fw-medium">{formatearFecha(c.fecha)}</div></td>
                       <td><span className="text-muted">{c.horaInicio?.slice(0, 5)} - {c.horaFin?.slice(0, 5)}</span></td>
                       <td><span className={`badge ${estadoCfg.clase}`}>{estadoCfg.label}</span></td>
+                      <td>
+                        <span className={`badge ${pagoCfg.clase}`}>
+                          {pagoCfg.label}
+                        </span>
+                      </td>
                       <td className="text-center">
                         {c.estado === "Confirmada" ? (
-                          <a href={c.linkMeet} target="_blank" rel="noopener noreferrer" className="btn btn-sm btn-outline-primary">
-                            <i className="bi bi-camera-video me-1"></i> Meet
+                          <a 
+                            href={c.enlaceAccion} 
+                            target="_blank" 
+                            rel="noopener noreferrer" 
+                            className={`btn btn-sm ${c.estadoPago === 'Pagado' ? 'btn-outline-primary' : 'btn-outline-warning'}`}
+                          >
+                            <i className={`bi ${c.estadoPago === 'Pagado' ? 'bi-camera-video' : 'bi-credit-card'} me-1`}></i>
+                            {c.estadoPago === 'Pagado' ? 'Meet' : 'Pagar'}
                           </a>
                         ) : <span className="text-muted">-</span>}
                       </td>
@@ -118,7 +138,7 @@ const CitasView = () => {
                   );
                 })
               ) : (
-                <tr><td colSpan="6" className="text-center py-5 text-muted">No se encontraron citas.</td></tr>
+                <tr><td colSpan="7" className="text-center py-5 text-muted">No se encontraron citas.</td></tr>
               )}
             </tbody>
           </table>
