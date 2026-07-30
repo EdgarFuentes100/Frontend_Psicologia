@@ -21,7 +21,7 @@ function useFetch() {
 
     return {
       ok: true,
-      datos: payload && payload.datos ? payload.datos : payload,
+      datos: payload && payload.datos !== undefined ? payload.datos : payload,
       mensaje: payload?.mensaje || null,
       status: response.status,
     };
@@ -44,7 +44,18 @@ function useFetch() {
     }).then(manejarRespuesta);
   }, [urlBase]);
 
-  return { getFetch, postFetch };
+  // 1. NUEVA FUNCIÓN PATCH
+  const patchFetch = useCallback((urlParcial, datos) => {
+    return fetch(urlBase + urlParcial, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos),
+      credentials: "include",
+    }).then(manejarRespuesta);
+  }, [urlBase]);
+
+  // 2. No olvides retornarlo aquí para que esté disponible en tu custom hook
+  return { getFetch, postFetch, patchFetch };
 }
 
 export { useFetch };
