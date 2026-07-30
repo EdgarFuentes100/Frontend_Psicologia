@@ -29,20 +29,43 @@ function Login() {
     return () => clearInterval(interval);
   }, [frases.length]);
 
+  // Función para formatear el DUI automáticamente (00000000-0)
+  const handleDuiChange = (e) => {
+    let valor = e.target.value.replace(/\D/g, ""); // Extrae solo los números
+    
+    if (valor.length > 8) {
+      valor = valor.slice(0, 8) + "-" + valor.slice(8, 9); // Inserta el guion
+    }
+    
+    if (valor.length > 10) {
+      valor = valor.slice(0, 10); // Máximo 10 caracteres (8 números + guion + 1 verificador)
+    }
+
+    setDui(valor);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (pin.length !== 4) return;
+    if (pin.length !== 4 || !dui.trim()) {
+      setErrorMsg("Ingrese un DUI válido y un PIN de 4 dígitos");
+      return;
+    }
+
     setIsLoading(true);
     setErrorMsg(null);
 
     try {
-      const resp = await postFetch("auth/login", { pin });
+      const resp = await postFetch("auth/login", { dui: dui.trim(), pin });
+      
       if (!resp.ok) {
-        setErrorMsg(resp.mensaje || "PIN incorrecto");
+        setErrorMsg(resp.mensaje || "Credenciales incorrectas");
         return;
       }
+      
       setUser(resp.datos);
       navigate(resp.datos.rol === "Paciente" ? "/userHome" : "/dashboard", { replace: true });
+    } catch (error) {
+      setErrorMsg("Ocurrió un error al intentar iniciar sesión");
     } finally {
       setIsLoading(false);
     }
@@ -100,8 +123,9 @@ function Login() {
               className="form-control"
               placeholder="DUI (00000000-0)"
               value={dui}
-              onChange={(e) => setDui(e.target.value)}
-              style={{ padding: '0.6rem', fontSize: '1rem', textAlign: 'center' }}
+              onChange={handleDuiChange} // <--- Aplicamos la función aquí
+              maxLength={10}
+              style={{ padding: '0.6rem', fontSize: '1rem', textAlign: 'center', letterSpacing: '0.1rem' }}
             />
           </div>
 
@@ -137,8 +161,8 @@ function Login() {
           <button
             type="submit"
             className="btn w-100 py-2 fw-bold text-white"
-            disabled={pin.length !== 4 || isLoading}
-            style={{ background: pin.length === 4 && !isLoading ? "#1a6a6a" : "#a0aec0", border: "none", borderRadius: "0.625rem" }}
+            disabled={pin.length !== 4 || dui.length < 10 || isLoading}
+            style={{ background: pin.length === 4 && dui.length === 10 && !isLoading ? "#1a6a6a" : "#a0aec0", border: "none", borderRadius: "0.625rem" }}
           >
             {isLoading ? "Validando..." : "INICIAR SESIÓN"}
           </button>
